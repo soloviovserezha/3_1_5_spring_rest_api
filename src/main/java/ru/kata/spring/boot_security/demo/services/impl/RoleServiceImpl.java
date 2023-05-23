@@ -23,4 +23,9 @@ public class RoleServiceImpl implements RoleService {
     public Set<Role> getRoles() {
         return new HashSet<>(roleRepository.findAll());
     }
+
+    @Override
+    public Role addRole(Role role) {
+        return roleRepository.save(role);
+    }
 }

@@ -61,29 +61,25 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     @Transactional
-    public User deleteUserById(Long id) {
+    public void deleteUserById(Long id) {
         userRepository.deleteById(id);
-        return null;
-    }
-
-    @Override
-    @Transactional
-    public void deleteAllUsers() {
-        userRepository.deleteAll();
     }
 
     @Override
     @Transactional
     public User changeUser(User user) {
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
     }
 
     @Override
     @Transactional
-    public boolean saveUser(User user) {
+    public void saveUser(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        for (User userCompare : userRepository.findAll()) {
+            if (userCompare.getUsername().equals(user.getUsername())) {
+                throw new RuntimeException();
+            }
+        }
         userRepository.save(user);
-        return true;
     }
 }

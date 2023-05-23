@@ -5,23 +5,24 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.transaction.annotation.Transactional;
 import ru.kata.spring.boot_security.demo.entities.Role;
 import ru.kata.spring.boot_security.demo.entities.User;
+import ru.kata.spring.boot_security.demo.services.RoleService;
 import ru.kata.spring.boot_security.demo.services.UserService;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.Set;
 
 @SpringBootApplication
 public class SpringBootSecurityDemoApplication implements ApplicationRunner {
 
 	private final UserService userService;
+	private final RoleService roleService;
 
 	@Autowired
-	public SpringBootSecurityDemoApplication(UserService userService) {
+	public SpringBootSecurityDemoApplication(UserService userService, RoleService roleService) {
 		this.userService = userService;
+		this.roleService = roleService;
 	}
 
 
@@ -32,26 +33,22 @@ public class SpringBootSecurityDemoApplication implements ApplicationRunner {
 	@Override
 	@Transactional
 	public void run(ApplicationArguments args) throws Exception {
-		Set<Role> rolesSet = new LinkedHashSet<>();
-		rolesSet.add(new Role("ROLE_USER"));
-		rolesSet.add(new Role("ROLE_ADMIN"));
+		Role roleUser = roleService.addRole(new Role("ROLE_USER"));
+		Role roleAdmin = roleService.addRole(new Role("ROLE_ADMIN"));
 
 		User user = new User();
-
-		Set<Role> userRoles = new HashSet<>();
-		userRoles.add(rolesSet.stream().findFirst().get());
 
 		user.setUsername("user");
 		user.setEmail("user@gmail.com");
 		user.setPassword("user");
-		user.setRoles(userRoles);
+		user.setRoles(Set.of(roleUser));
 
 		User admin = new User();
 
 		admin.setUsername("admin");
 		admin.setEmail("admin@gmail.com");
 		admin.setPassword("admin");
-		admin.setRoles(rolesSet);
+		admin.setRoles(Set.of(roleUser, roleAdmin));
 
 		userService.saveUser(user);
 		userService.saveUser(admin);

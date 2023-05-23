@@ -35,8 +35,13 @@ async function activePillContent(tabId) {
 
 async function getMyUser() {
     let res = await fetch('/api/auth');
-    let resUser = await res.json();
-    userNavbarDetails(resUser);
+    try {
+        let resUser = await res.json();
+        userNavbarDetails(resUser);
+    } catch (error) {
+        getAdminPage();
+        console.log(error)
+    }
 }
 
 window.addEventListener('DOMContentLoaded', getMyUser);
@@ -88,24 +93,28 @@ async function loadUserTable() {
     let tableBody = document.getElementById('tableUser');
     let page = await fetch("/api/auth");
     let currentUser;
-    if (page.ok) {
-        currentUser = await page.json();
-    } else {
-        alert(`Error, ${page.status}`)
-    }
-    let dataHtml = '';
-    let roles = [];
-    for (let role of currentUser.roles) {
-        roles.push(" " + role.name)
-    }
-    dataHtml +=
-        `<tr>
+    try {
+        if (page.ok) {
+            currentUser = await page.json();
+        } else {
+            alert(`Error, ${page.status}`)
+        }
+        let dataHtml = '';
+        let roles = [];
+        for (let role of currentUser.roles) {
+            roles.push(" " + role.name)
+        }
+        dataHtml +=
+            `<tr>
     <td>${currentUser.id}</td>
     <td>${currentUser.username}</td>
     <td>${currentUser.email}</td>
     <td>${roles}</td>
 </tr>`
-    tableBody.innerHTML = dataHtml;
+        tableBody.innerHTML = dataHtml;
+    } catch (error) {
+        console.log(error);
+    }
 }
 
 const tabs = document.querySelectorAll('.taba');
@@ -132,21 +141,6 @@ async function activeTabContent(tabaId) {
 //добавление юзера
 const form_new = document.getElementById('formForNewUser');
 const roles_new = document.getElementById('roleSelect');
-
-const rolesUrl = 'http://localhost:8080/api/roles';
-let options = '';
-
-fetch(rolesUrl)
-    .then(res => res.json())
-    .then(data => {
-        console.log(data)
-        options = '';
-        for (const [k, v] of Object.entries(data)) {
-            options += `<option value="${Number(k) + 1}">${v.name}</option>`;
-        }
-        roles_new.innerHTML = options;
-        console.log(options)
-    })
 
 async function newUser() {
     form_new.addEventListener('submit', addNewUser);
@@ -187,16 +181,17 @@ async function addNewUser(event) {
     });
 }
 
+//изменение юзера
 const form_ed = document.getElementById('formForEditing');
 const id_ed = document.getElementById('id_ed');
 const username_ed = document.getElementById('username_ed');
 const email_ed = document.getElementById('email_ed');
 const password_ed = document.getElementById('password_ed');
-
+const roles_ed = document.getElementById('rolesForEditing');
 
 async function editModalData(id) {
     $('#editModal').modal('show');
-    const urlDataEd = 'http://localhost:8080/api/users/' + id;
+    const urlDataEd = url + '/' + id;
     let usersPageEd = await fetch(urlDataEd);
     if (usersPageEd.ok) {
         await usersPageEd.json().then(user => {
@@ -211,12 +206,14 @@ async function editModalData(id) {
 }
 
 async function editUser() {
-    let urlEdit = 'http://localhost:8080/api/users/' + id_ed.value;
+    let urlEdit = url + '/' + id_ed.value;
     let listOfRole = [];
-    for (let i = 0; i < form_ed.rolesForEditing.options.length; i++) {
-        if (form_ed.rolesForEditing.options[i].selected) {
-            listOfRole.push({id: form_ed.rolesForEditing.options[i].value,
-                name: form_ed.rolesForEditing.options[i].text});
+    for (let i = 0; i < roles_ed.options.length; i++) {
+        if (roles_ed.options[i].selected) {
+            listOfRole.push({
+                id: roles_ed.options[i].value,
+                name: roles_ed.options[i].text
+            });
         }
     }
     let method = {
@@ -238,6 +235,7 @@ async function editUser() {
     })
 }
 
+//удаление юзера
 const form_del = document.getElementById('formForDeleting');
 const id_del = document.getElementById('id_del');
 const username_del = document.getElementById(`username_del`);
@@ -247,7 +245,7 @@ const password_del = document.getElementById('password_del');
 
 async function deleteModalData(id) {
     $('#deleteModal').modal('show');
-    const urlForDel = 'http://localhost:8080/api/users/' + id;
+    const urlForDel = url + '/' + id;
     let usersPageDel = await fetch(urlForDel);
     if (usersPageDel.ok) {
         await usersPageDel.json().then(user => {
@@ -262,7 +260,7 @@ async function deleteModalData(id) {
 }
 
 async function deleteUser() {
-    let urlDel = 'http://localhost:8080/api/users/' + id_del.value;
+    let urlDel = url + '/' + id_del.value;
     let method = {
         method: 'DELETE',
         headers: {

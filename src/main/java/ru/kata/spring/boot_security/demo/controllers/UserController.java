@@ -15,7 +15,7 @@ import java.security.Principal;
 
 
 @Controller
-@RequestMapping
+@RequestMapping("/user")
 public class UserController {
 
     private UserServiceImpl userService;
@@ -24,14 +24,7 @@ public class UserController {
     public void setUserService(UserServiceImpl userService) {
         this.userService = userService;
     }
-
-    @GetMapping(path = "/api/auth", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<User> getAuthUser(@CurrentSecurityContext(expression = "authentication") Principal principal) {
-        User user = userService.findByUsername(principal.getName());
-        return ResponseEntity.ok(user);
-    }
-
-    @GetMapping("/user/users")
+    @GetMapping("/users")
     public String getAllUsers(Model model, Principal principal) {
         User userPrincipal = userService.findByUsername(principal.getName());
         model.addAttribute("userPrincipal", userPrincipal);

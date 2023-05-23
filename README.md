@@ -1,4 +1,22 @@
 # 3_1_5_spring_rest_api
 
-не понимаю, как сохранить юзера с ролями. Получается сохранить юзера с любым набором данных, но без ролей, при этом, если редактировать юзера, роль присваивается. 
-в том числе, роль будет присвоена новому, вновь добавленному юзеру
+---
+1) spring.jpa.hibernate.ddl-auto=create
+2) server.port=8080
+---
+
+А как лучше обрабатывать уникальность юзернейма? В сервисе, к примеру через такую
+конструкцию 
+```java
+for (User userCompare : userRepository.findAll()) {
+    if (userCompare.getUsername().equals(user.getUsername())) {
+        throw new RuntimeException();
+    }
+}
+```
+или через такую запись
+
+```java
+@Column(name = "user_name", unique = true)
+    private String username;
+```

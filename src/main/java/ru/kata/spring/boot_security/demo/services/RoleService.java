@@ -5,6 +5,8 @@ import ru.kata.spring.boot_security.demo.entities.Role;
 import java.util.Set;
 
 public interface RoleService {
-
     Set<Role> getRoles();
+    Role addRole(Role role);
+
+//    Role getRole();
 }
